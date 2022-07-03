@@ -7,4 +7,4 @@ NOT READY TO USE!!!
 
 In your textadept configuration directory, type
 
-    git clone afsdfad
+    git clone git@github.com:mhwombat/textadept-hydra.git modules/hydra
