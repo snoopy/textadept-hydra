@@ -86,7 +86,8 @@ A basic hydra key binding has the form:
 
 where
 
-- _key_ is the key that will trigger the action
-- _msg_ is the text that will be displayed in any help messages in the status bar
-- _action_ is either a Textadept function call, or another hydra key binding
-- `persistent` is optional. If set to `true`, the hydra will remain active
+- _key_ is the key that will trigger the action.
+- _msg_ is the text that will be displayed in help messages in the status bar.
+  This text is optional in a top-level hydra key binding.
+- _action_ is either a Textadept function call, or another hydra key binding.
+- `persistent` is optional. If set to `true`, the hydra will remain active after the action is performed.
