@@ -1,5 +1,22 @@
 # textadept-hydra
+
 A plugin for the textadept editor, modeled on the emacs "hydra" plugin.
+It allows you to define key maps for related commands, with the ability to easily repeat commands by using a single keystroke. 
+
+For example, the following hydra would allow you to type `ctrl+w` to trigger a word navigation hydra,
+in which you can use the left and right arrow keys to navigate by words.
+Any other key will exit the hydra.
+
+```
+local word_hydra = {
+  help="word",
+  action = { 
+    ['right'] = { help="next", action=buffer.word_right, persistent=true },
+    ['left'] = { help="prev", action=buffer.word_left, persistent=true },
+  }
+}
+hydra.keys['ctrl+w'] = word_hydra
+```
 
 # Installation
 
