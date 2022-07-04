@@ -25,25 +25,6 @@ local function map(func, array)
   return new_array
 end
 
---local function get_keys(t)
---  local ks={}
---  for k,_ in pairs(t) do
---    table.insert(ks, k)
---  end
---  return k
---end
-
-local function expecting(key)
-  for k,_ in pairs(current_key_map) do
-    print("comparing",k,key)
-    if k == key then 
-      print("found a match!")
-      return true
-    end
-  end
-  return false
-end
-
 local function describe_key_map (m)
   help_msg = m.help .. ":"
   for k, v in pairs(m.action) do
@@ -53,54 +34,53 @@ local function describe_key_map (m)
 end
 
 local function start_hydra (key_map)
-  print("Entering a hydra")
   current_key_map = key_map.action
   hydra_active = true
   ui.statusbar_text = describe_key_map(key_map)
 end
 
 local function reset_hydra ()
-  print("Exiting hydra")
   current_key_map = M.keys
   hydra_active = false
-  ui.statusbar_text = "exit hydra"
+  ui.statusbar_text = ""
 end
 
-local function run_action(key_seq)
-  action = current_key_map[key_seq]
-  print("action", action)
+local function run_hydra(key_map)
+  action = key_map.action
   
   if type(action) == "table" then
-    start_hydra(action)
+    start_hydra(key_map)
+    return
+  else
+    -- invoke the action mapped to this key
+    action()
+    -- should the hydra stay active?
+    if not key_map.persistent then
+      reset_hydra()
+    end
     return
   end
-    
-  print("do the thing")
-  print(f"DEBUG action=", key_map.action)
-  print("DEBUG terminate=", key_map.terminate)
-  return
 end
 
 local function handle_key_seq (key_seq)
-  print("handling", key_seq)
-  print(">>> DEBUG")
-  util.print_table(current_key_map)
-  print("<<< DEBUG")
-  expected = expecting(key_seq)
-  
-  if expected then
-    run_action(key_seq)
-    return true
-  end
-  
-  if hydra_active then
-    reset_hydra()
+  --print("handling", key_seq)
+  local active_key_map = current_key_map[key_seq]
+
+  if active_key_map == nil then
+    -- An unexpected key cancels any active hydra
+    if hydra_active then
+      reset_hydra()
+    end
+    -- Let Textadept or another module handle the key
+    return
+  else    
+    run_hydra(active_key_map)
+    -- We've handled the key, no need for Textadept or another module to act
     return true
   end
 end
 
 events.connect(events.INITIALIZED, function()
-  print("initialising hydra")
   reset_hydra()
 end)
 
