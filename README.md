@@ -1,8 +1,6 @@
 # textadept-hydra
 A plugin for the textadept editor, modeled on the emacs "hydra" plugin.
 
-NOT READY TO USE!!!
-
 # Installation
 
 In your textadept configuration directory, type
@@ -59,3 +57,16 @@ hydra.keys['ctrl+f'] = file_hydra
 hydra.keys['ctrl+w'] = word_hydra
 hydra.keys['ctrl+l'] = line_hydra
 ```
+
+# Configuration syntax
+
+A basic hydra key binding has the form:
+
+    _key_ = { help=_msg_, action=_action_[, persistent=true] }
+
+where
+
+- _key_ is the key that will trigger the action
+- _msg_ is the text that will be displayed in any help messages in the status bar
+- _action_ is either a Textadept function call, or another hydra key binding
+- `persistent` is optional. If set to `true`, the hydra will remain active
