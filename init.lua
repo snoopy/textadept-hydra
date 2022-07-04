@@ -26,11 +26,15 @@ local function map(func, array)
 end
 
 local function describe_key_map (m)
-  help_msg = m.help .. ":"
-  for k, v in pairs(m.action) do
-    help_msg = help_msg .. "\n" .. k .. ") " .. v.help
+  if m.help then
+    help_msgs = { m.help .. ":" }
+  else
+    help_msgs = {}
   end
-  return help_msg
+  for k, v in pairs(m.action) do
+    table.append(help_msgs, k .. ") " .. v.help)
+  end
+  return tab.concat(help_msgs, "\n")
 end
 
 local function start_hydra (key_map)
