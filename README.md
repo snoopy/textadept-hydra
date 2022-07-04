@@ -2,6 +2,9 @@
 
 A plugin for the textadept editor, modeled on the emacs "hydra" plugin.
 It allows you to define key maps for related commands, with the ability to easily repeat commands by using a single keystroke. 
+This allows you to avoid the mouse.
+When a hydra is active, the available keys and actions are displayed in the status bar,
+so you don't need to memorise them.
 
 For example, the following hydra would allow you to type `ctrl+w` to trigger a word navigation hydra,
 in which you can use the left and right arrow keys to navigate by words.
