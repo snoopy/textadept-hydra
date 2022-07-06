@@ -7,8 +7,6 @@ module('lsp')]]
 
 local M = {}
 
-local util = require('util')
-
 M.keys = {}
 
 local CTRL, ALT, CMD, SHIFT = 'ctrl+', 'alt+', 'cmd+', 'shift+'
@@ -16,6 +14,11 @@ if CURSES then ALT = 'meta+' end
 
 local current_key_map = M.keys
 local hydra_active = false
+local parsed_keys = {}
+
+--
+-- Utility functions
+--
 
 local function map(func, array)
   local new_array = {}
@@ -25,26 +28,50 @@ local function map(func, array)
   return new_array
 end
 
-local function describe_key_map (m)
-  if m.help then
-    help_msgs = { m.help .. ":" }
-  else
-    help_msgs = {}
+--
+-- Functions to convert the user's keymap configuration to a form that
+-- is more convenient for this module.
+--
+
+local function describe_hydra (x)
+  local leader = ""
+  if x.help then
+    leader = x.help .. ": "
   end
-  for k, v in pairs(m.action) do
-    table.append(help_msgs, k .. ") " .. v.help)
+  entries = {}
+  for k,v in pairs(x.action) do
+    table.insert(entries, v.key .. ") " .. v.help)
   end
-  return tab.concat(help_msgs, "\n")
+  return (leader .. table.concat(entries, ", "))
 end
+
+local function parse (x)
+  local result = {}
+  for k,v in pairs(x) do
+    local v2 = { persistent=v.persistent }
+    if type(v.action) == "table" then
+      v2.menu = describe_hydra(v)
+      v2.action = parse(v.action)
+    else
+      v2.action = v.action
+    end
+    result[v.key] = v2
+  end
+  return result
+end
+
+--
+-- Functions for reacting to keypress events
+--
 
 local function start_hydra (key_map)
   current_key_map = key_map.action
   hydra_active = true
-  ui.statusbar_text = describe_key_map(key_map)
+  ui.statusbar_text = key_map.menu
 end
 
 local function reset_hydra ()
-  current_key_map = M.keys
+  current_key_map = parsed_keys
   hydra_active = false
   ui.statusbar_text = ""
 end
@@ -84,7 +111,13 @@ local function handle_key_seq (key_seq)
   end
 end
 
+--
+-- Main code for module
+--
+
 events.connect(events.INITIALIZED, function()
+  print("Textadept has finished initialising?")
+  parsed_keys = parse(M.keys)
   reset_hydra()
 end)
 
@@ -107,7 +140,7 @@ events.connect(events.KEYPRESS, function(code, shift, control, alt, cmd, caps)
   local key_seq = (control and CTRL or '') .. (alt and ALT or '') .. (cmd and OSX and CMD or '') ..
     (shift and SHIFT or '') .. key
     
-  return(handle_key_seq(key_seq))
+  return handle_key_seq(key_seq)
 end, 1)
 
 return M

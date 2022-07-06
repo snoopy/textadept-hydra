@@ -34,48 +34,43 @@ Here's an example:
 local hydra = require('hydra')
 
 local file_hydra = {
-  help="file",
-  action = { 
-    ['n'] = { help="new", action=buffer.new },
-    ['o'] = { help="open", action=io.open_file },
-    ['r'] = { help="open recent", action=io.open_recent_file },
-    ['s'] = { help="save", action=buffer.save },
-    ['S'] = { help="save as", action=buffer.save_as },
-    ['c'] = { help="close", action=buffer.close },
-    ['R'] = { help="reload", action=buffer.reload },
-  }
+  { key='n', help="new", action=buffer.new },
+  { key='o', help="open", action=io.open_file },
+  { key='r', help="open recent", action=io.open_recent_file },
+  { key='s', help="save", action=buffer.save },
+  { key='S', help="save as", action=buffer.save_as },
+  { key='c', help="close", action=buffer.close },
+  { key='R', help="reload", action=buffer.reload },
 }
 
 local word_hydra = {
-  help="word",
-  action = { 
-    ['right'] = { help="next", action=buffer.word_right, persistent=true },
-    ['left'] = { help="prev", action=buffer.word_left, persistent=true },
-    ['shift+right'] = { help="extend selection", action=buffer.word_right_extend, persistent=true },
-    ['shift+left'] = { help="shrink selection", action=buffer.word_left_extend, persistent=true },
-    ['d'] = { help="delete", 
-              action= function()
-                        textadept.editing.select_word()
-                        buffer:delete_back()
-                      end, 
-              persistent=true },
-  }
+  { key='right', help="next", action=buffer.word_right, persistent=true },
+  { key='left', help="prev", action=buffer.word_left, persistent=true },
+  { key='shift+right', help="extend selection", action=buffer.word_right_extend, persistent=true },
+  { key='shift+left', help="shrink selection", action=buffer.word_left_extend, persistent=true },
+  { key='d', 
+    help="delete", 
+    action= function()
+              textadept.editing.select_word()
+              buffer:delete_back()
+            end, 
+    persistent=true },
 }
 
 local line_hydra = {
-  help="line",
-  action = { 
-    ['+'] = { help="join", action=textadept.editing.join_lines },
-    ['|'] = { help="pipe to bash", 
-              action=function()
-                       ui.command_entry.run(textadept.editing.filter_through, 'bash')
-                     end },
-  }
+  { key='+', help="join", action=textadept.editing.join_lines },
+  { key='|', 
+    help="pipe to bash", 
+    action=function()
+             ui.command_entry.run(textadept.editing.filter_through, 'bash')
+           end },
 }
 
-hydra.keys['ctrl+f'] = file_hydra
-hydra.keys['ctrl+w'] = word_hydra
-hydra.keys['ctrl+l'] = line_hydra
+hydra.keys = {
+  { key='ctrl+F', help="file", action=file_hydra },
+  { key='ctrl+w', help="word", action=word_hydra },
+  { key='ctrl+l', help="line", action=line_hydra }
+}
 ```
 
 # Configuration syntax
