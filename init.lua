@@ -30,10 +30,11 @@ end
 
 local function pretty_key(c)
   if c == ' ' then return 'space' end
+  if c == '\t' then return 'tab' end
   return c
 end
 
-function raw(o)
+local function raw(o)
    if type(o) == 'table' then
       local s = '{ '
       for k,v in pairs(o) do
@@ -46,7 +47,7 @@ function raw(o)
    end
 end
 
-function dump(leader, t)
+local function dump(leader, t)
   for k,v in pairs(t) do
     s = leader .. pretty_key(k) .. ': '
     if type(v.action) == 'table' then
@@ -73,7 +74,10 @@ local function describe_hydra (x)
     table.insert(entries, x.help .. ': ')
   end
   for k,v in pairs(x.action) do
-    table.insert(entries, pretty_key(v.key) .. ') ' .. v.help)
+    s = pretty_key(v.key) .. ') ' .. v.help
+    if v.persistent then s = s .. '*' end
+    if type(v.action) == 'table' then s = s .. '...' end
+    table.insert(entries, s)
   end
   return table.concat(entries, ' | ')
 end
