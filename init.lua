@@ -28,29 +28,62 @@ local function map(func, array)
   return new_array
 end
 
+local function pretty_key(c)
+  if c == ' ' then return 'space' end
+  return c
+end
+
+function raw(o)
+   if type(o) == 'table' then
+      local s = '{ '
+      for k,v in pairs(o) do
+         if type(k) ~= 'number' then k = '"'..k..'"' end
+         s = s .. '['..k..'] = ' .. raw(v) .. ','
+      end
+      return s .. '} '
+   else
+      return tostring(o)
+   end
+end
+
+function dump(leader, t)
+  for k,v in pairs(t) do
+    s = leader .. pretty_key(k) .. ': '
+    if type(v.action) == 'table' then
+      ui.print(s .. v.hint)
+      dump(leader .. '  ', v.action)
+    else
+      ui.print(s .. tostring(v.action))
+    end
+  end
+end
+
+function M.print_keys()
+  dump('', parsed_keys)
+end
+
 --
 -- Functions to convert the user's keymap configuration to a form that
 -- is more convenient for this module.
 --
 
 local function describe_hydra (x)
-  local leader = ""
+  local entries = {}
   if x.help then
-    leader = x.help .. ": "
+    table.insert(entries, x.help .. ': ')
   end
-  entries = {}
   for k,v in pairs(x.action) do
-    table.insert(entries, v.key .. ") " .. v.help)
+    table.insert(entries, pretty_key(v.key) .. ') ' .. v.help)
   end
-  return (leader .. table.concat(entries, ", "))
+  return table.concat(entries, ' | ')
 end
 
 local function parse (x)
   local result = {}
   for k,v in pairs(x) do
     local v2 = { persistent=v.persistent }
-    if type(v.action) == "table" then
-      v2.menu = describe_hydra(v)
+    if type(v.action) == 'table' then
+      v2.hint = describe_hydra(v)
       v2.action = parse(v.action)
     else
       v2.action = v.action
@@ -67,19 +100,19 @@ end
 local function start_hydra (key_map)
   current_key_map = key_map.action
   hydra_active = true
-  ui.statusbar_text = key_map.menu
+  ui.statusbar_text = key_map.hint
 end
 
 local function reset_hydra ()
   current_key_map = parsed_keys
   hydra_active = false
-  ui.statusbar_text = ""
+  ui.statusbar_text = ''
 end
 
 local function run_hydra(key_map)
   action = key_map.action
   
-  if type(action) == "table" then
+  if type(action) == 'table' then
     start_hydra(key_map)
     return
   else
@@ -94,7 +127,7 @@ local function run_hydra(key_map)
 end
 
 local function handle_key_seq (key_seq)
-  --print("handling", key_seq)
+  --print('handling', key_seq)
   local active_key_map = current_key_map[key_seq]
 
   if active_key_map == nil then
@@ -116,7 +149,6 @@ end
 --
 
 events.connect(events.INITIALIZED, function()
-  print("Textadept has finished initialising?")
   parsed_keys = parse(M.keys)
   reset_hydra()
 end)
