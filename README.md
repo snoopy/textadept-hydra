@@ -6,11 +6,13 @@ This allows you to avoid the mouse.
 When a hydra is active, the available keys and actions are displayed in the status bar,
 so you don't need to memorise them.
 
-For example, the following hydra would allow you to type `ctrl+w` to trigger a word navigation hydra,
+For example, the following configuration would allow you to type `ctrl+w` to trigger a word navigation hydra,
 in which you can use the left and right arrow keys to navigate by words.
 Any other key will exit the hydra.
 
 ```
+local hydra = require('hydra')
+
 local word_hydra = {
   { key='left', help="prev", action=buffer.word_left, persistent=true },
   { key='right', help="next", action=buffer.word_right, persistent=true },
