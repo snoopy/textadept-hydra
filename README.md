@@ -74,4 +74,4 @@ where
   
   # Sample configurations
   
-  _coming soon_
+  - [mhwombat's config](https://github.com/mhwombat/dotWombat/blob/master/.config/textadept/init.lua)
