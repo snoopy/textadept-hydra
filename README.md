@@ -61,7 +61,7 @@ hydra.keys = {
 
 A basic hydra key binding has the form:
 
-`{ key=`_key_`, help=`_msg_`, action=`_action_`[, persistent=true] }`
+**{ key=**_key_**, help=**_msg_**, action=**_action_**[, persistent=true] }**
 
 where
 
