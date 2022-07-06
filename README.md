@@ -70,3 +70,4 @@ where
   This text is optional in a top-level hydra key binding.
 - _action_ is either a Textadept function call, or another hydra key binding.
 - `persistent` is optional. If set to `true`, the hydra will remain active after the action is performed.
+  Any key that is not bound in this hydra will terminate the hydra.
