@@ -2,7 +2,6 @@
 
 A plugin for the textadept editor, modeled on the emacs [hydra](https://github.com/abo-abo/hydra) plugin.
 It allows you to define key maps for related commands, with the ability to easily repeat commands by using a single keystroke. 
-This allows you to avoid the mouse.
 When a hydra is active, the available keys and actions are displayed in the status bar,
 so you don't need to memorise them.
 
