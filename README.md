@@ -67,7 +67,9 @@ where
 
 - _key_ is the key that will trigger the action.
 - _msg_ is the text that will be displayed in help messages in the status bar.
-  This text is optional in a top-level hydra key binding.
+  This field is only used in nested hydras.
+  If the action is persistent, `*` will be displayed after it.
+  If the action is another hydra, `...` will be displayed after it.
 - _action_ is either a Textadept function call, or another hydra key binding.
 - `persistent` is optional. If set to `true`, the hydra will remain active after the action is performed.
   Any key that is not bound in this hydra will terminate the hydra.
