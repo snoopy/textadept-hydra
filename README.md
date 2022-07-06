@@ -12,13 +12,13 @@ Any other key will exit the hydra.
 
 ```
 local word_hydra = {
-  help="word",
-  action = { 
-    ['right'] = { help="next", action=buffer.word_right, persistent=true },
-    ['left'] = { help="prev", action=buffer.word_left, persistent=true },
-  }
+  { key='left', help="prev", action=buffer.word_left, persistent=true },
+  { key='right', help="next", action=buffer.word_right, persistent=true },
 }
-hydra.keys['ctrl+w'] = word_hydra
+
+hydra.keys = {
+  { key='ctrl+w', help="word", action=word_hydra },
+}
 ```
 
 # Installation
