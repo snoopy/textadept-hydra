@@ -30,7 +30,7 @@ In your textadept configuration directory, type
     git clone git@github.com:mhwombat/textadept-hydra.git modules/hydra
 
 Configure your desired hydra key bindings in `init.lua`.
-Here's an example:
+Here's a simple example that illustrates the flexibility of textadept-hydra:
 
 ```
 local hydra = require('hydra')
@@ -71,3 +71,7 @@ where
 - _action_ is either a Textadept function call, or another hydra key binding.
 - `persistent` is optional. If set to `true`, the hydra will remain active after the action is performed.
   Any key that is not bound in this hydra will terminate the hydra.
+  
+  # Sample configurations
+  
+  _coming soon_
