@@ -13,6 +13,7 @@ local CTRL, ALT, CMD, SHIFT = 'ctrl+', 'alt+', 'cmd+', 'shift+'
 if CURSES then ALT = 'meta+' end
 
 local current_key_map = M.keys
+local current_hint = ""
 local hydra_active = false
 local parsed_keys = {}
 
@@ -74,12 +75,13 @@ local function describe_hydra (x)
     table.insert(entries, x.help .. ': ')
   end
   for k,v in pairs(x.action) do
+    --ui.print('v=', raw(v))
     s = pretty_key(v.key) .. ') ' .. v.help
     if v.persistent then s = s .. '*' end
     if type(v.action) == 'table' then s = s .. '...' end
     table.insert(entries, s)
   end
-  return table.concat(entries, ' | ')
+  return table.concat(entries, '\n')
 end
 
 local function parse (x)
@@ -92,7 +94,11 @@ local function parse (x)
     else
       v2.action = v.action
     end
-    result[v.key] = v2
+    if result[v.key] then
+      ui.print('[hydra] WARNING: duplicate binding for key: ' .. pretty_key(v.key) .. ' "' .. v.help .. '"')
+    else
+      result[v.key] = v2
+    end
   end
   return result
 end
@@ -104,13 +110,18 @@ end
 local function start_hydra (key_map)
   current_key_map = key_map.action
   hydra_active = true
-  ui.statusbar_text = key_map.hint
+  current_hint = key_map.hint
+  view:call_tip_show(buffer.current_pos, current_hint)
+end
+
+local function maintain_hydra ()
+  view:call_tip_show(buffer.current_pos, current_hint)
 end
 
 local function reset_hydra ()
   current_key_map = parsed_keys
   hydra_active = false
-  ui.statusbar_text = ''
+  view:call_tip_cancel()
 end
 
 local function run_hydra(key_map)
@@ -123,7 +134,9 @@ local function run_hydra(key_map)
     -- invoke the action mapped to this key
     action()
     -- should the hydra stay active?
-    if not key_map.persistent then
+    if key_map.persistent then
+      maintain_hydra()
+    else
       reset_hydra()
     end
     return
