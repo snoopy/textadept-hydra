@@ -73,6 +73,8 @@ where
 - `persistent` is optional. If set to `true`, the hydra will remain active after the action is performed.
   Any key that is not bound in this hydra will terminate the hydra.
   
-  # Sample configurations
+# Sample configurations
   
-  - [mhwombat's config](https://github.com/mhwombat/dotWombat/blob/master/.config/textadept/init.lua)
+- [mhwombat's config](https://github.com/mhwombat/dotWombat/blob/master/.config/textadept/init.lua)
+
+Do you have a configuration that you would like to share? Please [open an issue](https://github.com/mhwombat/textadept-hydra/issues).
