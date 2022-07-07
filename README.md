@@ -65,7 +65,7 @@ A basic hydra key binding has the form:
 where
 
 - _key_ is the key that will trigger the action.
-- _msg_ is the text that will be displayed in help messages in the status bar.
+- _msg_ is the hint that will be displayed in the popup.
   This field is only used in nested hydras.
   If the action is persistent, `*` will be displayed after it.
   If the action is another hydra, `...` will be displayed after it.
