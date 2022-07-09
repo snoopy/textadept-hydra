@@ -32,6 +32,7 @@ end
 local function pretty_key(c)
   if c == ' ' then return 'space' end
   if c == '\t' then return 'tab' end
+  if c == '\n' then return 'enter' end
   return c
 end
 
