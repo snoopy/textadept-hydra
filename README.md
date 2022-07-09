@@ -78,3 +78,16 @@ where
 - [mhwombat's config](https://github.com/mhwombat/dotWombat/blob/master/.config/textadept/init.lua)
 
 Do you have a configuration that you would like to share? Please [open an issue](https://github.com/mhwombat/textadept-hydra/issues).
+
+# Using with textredux
+
+The hydra key bindings are separate from the normal textadept key bindings, 
+so the Textredux `hijack` function doesn't have the intended effect.
+However, you can use the Textredux API. 
+For example, instead of using `io.open_file()` as a hydra action, use `textredux.fs.open_file`.
+
+# Support
+
+Have a question about how to use textadept-hydra? Please [start a discussion](https://github.com/mhwombat/textadept-hydra/discussions).
+
+Find a bug in textadept-hydra? Please [open an issue](https://github.com/mhwombat/textadept-hydra/issues).
