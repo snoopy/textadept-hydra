@@ -53,7 +53,7 @@ local function dump(leader, t)
   for k,v in pairs(t) do
     s = leader .. pretty_key(k) .. ': '
     if type(v.action) == 'table' then
-      ui.print(s .. v.hint)
+      ui.print(s .. string.gsub(v.hint,'\n',' '))
       dump(leader .. '  ', v.action)
     else
       ui.print(s .. tostring(v.action))
@@ -97,8 +97,8 @@ end
 
 local function describe_hydra (x)
   if type(x) ~= 'table' then
-    ui.print('expected a table: ' .. raw(x))
-    return {}
+    ui.print('expected a table in describe_hydra: ' .. raw(x))
+    return ''
   end
   
   local entries = {}
@@ -119,6 +119,11 @@ local function describe_hydra (x)
 end
 
 local function parse (x)
+  if type(x) ~= 'table' then
+    ui.print('expected a table in describe_hydra: ' .. raw(x))
+    return {}
+  end
+  
   local result = {}
   for k,v in pairs(x) do
     local v2 = { persistent=v.persistent }
