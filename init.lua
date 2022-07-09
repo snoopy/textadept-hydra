@@ -124,6 +124,22 @@ local function reset_hydra ()
   view:call_tip_cancel()
 end
 
+local function run(action)
+  -- temporarily disable hydra
+  local current_key_map_before = current_key_map
+  local hydra_active_before = hydra_active
+  current_key_map = nil
+  hydra_active = false
+  view:call_tip_cancel()
+  
+  -- run the action
+  action()
+  
+  -- re-enable hydra
+  current_key_map = current_key_map_before
+  hydra_active = hydra_active_before
+end
+
 local function run_hydra(key_map)
   action = key_map.action
   
@@ -132,7 +148,7 @@ local function run_hydra(key_map)
     return
   else
     -- invoke the action mapped to this key
-    action()
+    run(action)
     -- should the hydra stay active?
     if key_map.persistent then
       maintain_hydra()
