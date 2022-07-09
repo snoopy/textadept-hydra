@@ -70,18 +70,51 @@ end
 -- is more convenient for this module.
 --
 
+local function describe_hydra_entry(k,v)
+  s = ''
+  if v.key then
+    s = s .. pretty_key(v.key) .. ') '
+  else
+    ui.print('missing key: ' .. raw(v)) 
+  end
+  
+  if v.help then
+    s = s .. v.help
+  else
+    ui.print('missing help: ' .. raw(v)) 
+  end
+  
+  if v.persistent then s = s .. '*' end
+  
+  if v.action then
+    if type(v.action) == 'table' then s = s .. '...' end
+  else
+    ui.print('missing action: ' .. raw(v))
+  end
+  
+  return s
+end
+
 local function describe_hydra (x)
+  if type(x) ~= 'table' then
+    ui.print('expected a table: ' .. raw(x))
+    return {}
+  end
+  
   local entries = {}
+  
   if x.help then
     table.insert(entries, x.help .. ': ')
   end
-  for k,v in pairs(x.action) do
-    --ui.print('v=', raw(v))
-    s = pretty_key(v.key) .. ') ' .. v.help
-    if v.persistent then s = s .. '*' end
-    if type(v.action) == 'table' then s = s .. '...' end
-    table.insert(entries, s)
+  
+  if x.action then 
+    for k,v in pairs(x.action) do
+      table.insert(entries, describe_hydra_entry(k,v))
+    end
+  else
+    ui.print('missing action: ' .. raw(x)) 
   end
+  
   return table.concat(entries, '\n')
 end
 
