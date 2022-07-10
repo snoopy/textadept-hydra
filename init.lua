@@ -38,6 +38,9 @@ local function pretty_key(c)
   if c == '\t' then
     return 'tab'
   end
+  if c == '\n' then
+    return 'enter'
+  end
   return c
 end
 
@@ -60,7 +63,7 @@ local function dump(leader, t)
   for k, v in pairs(t) do
     s = leader .. pretty_key(k) .. ': '
     if type(v.action) == 'table' then
-      ui.print(s .. v.hint)
+      ui.print(s .. string.gsub(v.hint,'\n',' '))
       dump(leader .. '  ', v.action)
     else
       ui.print(s .. tostring(v.action))
@@ -77,26 +80,64 @@ end
 -- is more convenient for this module.
 --
 
-local function describe_hydra(x)
+local function describe_hydra_entry(k,v)
+  s = ''
+  if v.key then
+    s = s .. pretty_key(v.key) .. ') '
+  else
+    ui.print('missing key: ' .. raw(v)) 
+  end
+  
+  if v.help then
+    s = s .. v.help
+  else
+    ui.print('missing help: ' .. raw(v)) 
+  end
+  
+  if v.persistent then
+    s = s .. '*' 
+  end
+  
+  if v.action then
+    if type(v.action) == 'table' then 
+      s = s .. '...' 
+    end
+  else
+    ui.print('missing action: ' .. raw(v))
+  end
+  
+  return s
+end
+
+local function describe_hydra (x)
+  if type(x) ~= 'table' then
+    ui.print('expected a table in describe_hydra: ' .. raw(x))
+    return ''
+  end
+  
   local entries = {}
+  
   if x.help then
     table.insert(entries, x.help .. ': ')
   end
-  for k, v in pairs(x.action) do
-    --ui.print('v=', raw(v))
-    s = pretty_key(v.key) .. ') ' .. v.help
-    if v.persistent then
-      s = s .. '*'
+  
+  if x.action then 
+    for k,v in pairs(x.action) do
+      table.insert(entries, describe_hydra_entry(k,v))
     end
-    if type(v.action) == 'table' then
-      s = s .. '...'
-    end
-    table.insert(entries, s)
+  else
+    ui.print('missing action: ' .. raw(x)) 
   end
+  
   return table.concat(entries, '\n')
 end
 
 local function parse(x)
+  if type(x) ~= 'table' then
+    ui.print('expected a table in describe_hydra: ' .. raw(x))
+    return {}
+  end
+  
   local result = {}
   for k, v in pairs(x) do
     local v2 = { persistent = v.persistent }
@@ -136,6 +177,22 @@ local function reset_hydra()
   view:call_tip_cancel()
 end
 
+local function run(action)
+  -- temporarily disable hydra
+  local current_key_map_before = current_key_map
+  local hydra_active_before = hydra_active
+  current_key_map = nil
+  hydra_active = false
+  view:call_tip_cancel()
+  
+  -- run the action
+  action()
+  
+  -- re-enable hydra
+  current_key_map = current_key_map_before
+  hydra_active = hydra_active_before
+end
+
 local function run_hydra(key_map)
   action = key_map.action
 
@@ -144,7 +201,7 @@ local function run_hydra(key_map)
     return
   else
     -- invoke the action mapped to this key
-    action()
+    run(action)
     -- should the hydra stay active?
     if key_map.persistent then
       maintain_hydra()
