@@ -12,14 +12,14 @@ Any other key will exit the hydra.
 ```
 local hydra = require('hydra')
 
-local word_hydra = {
-  { key='left', help="prev", action=buffer.word_left, persistent=true },
-  { key='right', help="next", action=buffer.word_right, persistent=true },
-}
+local word_hydra = hydra.create({
+  { key='left', help='prev', action=buffer.word_left, persistent=true },
+  { key='right', help='next', action=buffer.word_right, persistent=true },
+})
 
-hydra.keys = {
+hydra.keys = hydra.create({
   { key='ctrl+w', help="word", action=word_hydra },
-}
+})
 ```
 
 # Installation
@@ -34,26 +34,26 @@ Here's a simple example that illustrates the flexibility of textadept-hydra:
 ```
 local hydra = require('hydra')
 
-local word_hydra = {
-  { key='left', help="prev", action=buffer.word_left, persistent=true },
-  { key='right', help="next", action=buffer.word_right, persistent=true },
-  { key='shift+left', help="shrink selection", action=buffer.word_left_extend, persistent=true },
-  { key='shift+right', help="extend selection", action=buffer.word_right_extend, persistent=true },
-}
+local word_hydra = hydra.create({
+  { key='left', help='prev', action=buffer.word_left, persistent=true },
+  { key='right', help='next', action=buffer.word_right, persistent=true },
+  { key='shift+right', help='extend selection', action=buffer.word_right_extend, persistent=true },
+  { key='shift+left', help='shrink selection', action=buffer.word_left_extend, persistent=true },
+})
 
-local line_hydra = {
+local line_hydra = hydra.create({
   { key='j', help="join", action=textadept.editing.join_lines },
   { key='|', 
     help="pipe to bash", 
     action=function()
              ui.command_entry.run(textadept.editing.filter_through, 'bash')
            end },
-}
+})
 
-hydra.keys = {
+hydra.keys = hydra.create({
   { key='ctrl+w', help="word", action=word_hydra },
   { key='ctrl+l', help="line", action=line_hydra }
-}
+})
 ```
 
 # Configuration syntax

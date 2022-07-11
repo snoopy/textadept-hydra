@@ -15,21 +15,12 @@ if CURSES then
 end
 
 local current_key_map = M.keys
-local current_hint = ''
+local current_tip = ''
 local hydra_active = false
-local parsed_keys = {}
 
 --
 -- Utility functions
 --
-
-local function map(func, array)
-  local new_array = {}
-  for i, v in ipairs(array) do
-    new_array[i] = func(v)
-  end
-  return new_array
-end
 
 local function pretty_key(c)
   if c == ' ' then
@@ -44,115 +35,132 @@ local function pretty_key(c)
   return c
 end
 
-local function raw(o)
-  if type(o) == 'table' then
-    local s = '{ '
-    for k, v in pairs(o) do
-      if type(k) ~= 'number' then
-        k = '"' .. k .. '"'
-      end
-      s = s .. '[' .. k .. '] = ' .. raw(v) .. ','
-    end
-    return s .. '} '
-  else
-    return tostring(o)
-  end
-end
+local function show_table(node)
+    local cache, stack, output = {},{},{}
+    local depth = 1
+    local output_str = "{\n"
 
-local function dump(leader, t)
-  for k, v in pairs(t) do
-    s = leader .. pretty_key(k) .. ': '
-    if type(v.action) == 'table' then
-      ui.print(s .. string.gsub(v.hint,'\n',' '))
-      dump(leader .. '  ', v.action)
-    else
-      ui.print(s .. tostring(v.action))
+    while true do
+        local size = 0
+        for k,v in pairs(node) do
+            size = size + 1
+        end
+
+        local cur_index = 1
+        for k,v in pairs(node) do
+            if (cache[node] == nil) or (cur_index >= cache[node]) then
+
+                if (string.find(output_str,"}",output_str:len())) then
+                    output_str = output_str .. ",\n"
+                elseif not (string.find(output_str,"\n",output_str:len())) then
+                    output_str = output_str .. "\n"
+                end
+
+                -- This is necessary for working with HUGE tables otherwise we run out of memory using concat on huge strings
+                table.insert(output,output_str)
+                output_str = ""
+
+                local key
+                if (type(k) == "number" or type(k) == "boolean") then
+                    key = "["..tostring(k).."]"
+                else
+                    key = "['"..tostring(k).."']"
+                end
+
+                if (type(v) == "number" or type(v) == "boolean") then
+                    output_str = output_str .. string.rep('\t',depth) .. key .. " = "..tostring(v)
+                elseif (type(v) == "table") then
+                    output_str = output_str .. string.rep('\t',depth) .. key .. " = {\n"
+                    table.insert(stack,node)
+                    table.insert(stack,v)
+                    cache[node] = cur_index+1
+                    break
+                else
+                    v_str = tostring(v)
+                    v_str = string.gsub(v_str, '\n', '<ret>')
+                    output_str = output_str .. string.rep('\t',depth) .. key .. " = '"..v_str.."'"
+                end
+
+                if (cur_index == size) then
+                    output_str = output_str .. "\n" .. string.rep('\t',depth-1) .. "}"
+                else
+                    output_str = output_str .. ","
+                end
+            else
+                -- close the table
+                if (cur_index == size) then
+                    output_str = output_str .. "\n" .. string.rep('\t',depth-1) .. "}"
+                end
+            end
+
+            cur_index = cur_index + 1
+        end
+
+        if (size == 0) then
+            output_str = output_str .. "\n" .. string.rep('\t',depth-1) .. "}"
+        end
+
+        if (#stack > 0) then
+            node = stack[#stack]
+            stack[#stack] = nil
+            depth = cache[node] == nil and depth + 1 or depth - 1
+        else
+            break
+        end
     end
-  end
+
+    -- This is necessary for working with HUGE tables otherwise we run out of memory using concat on huge strings
+    table.insert(output,output_str)
+    output_str = table.concat(output)
+
+    return output_str
 end
 
 function M.print_keys()
-  dump('', parsed_keys)
+  ui.print(show_table(M.keys))
 end
 
 --
--- Functions to convert the user's keymap configuration to a form that
--- is more convenient for this module.
+-- Functions to define a hydra
 --
 
-local function describe_hydra_entry(k,v)
-  s = ''
-  if v.key then
-    s = s .. pretty_key(v.key) .. ') '
+local function add_binding(h, t)
+  local key = assert(t.key, '[hydra] missing "key" field')
+  local action = assert(t.action, '[hydra] missing "action" field')
+  local help = assert(t.help, '[hydra] missing "help" field')
+  local persistent = t.persistent
+  
+  if h.action[key] then
+    error('[hydra] WARNING: duplicate binding for key: ' .. pretty_key(key) .. ' "' .. help .. '"')
   else
-    ui.print('missing key: ' .. raw(v)) 
+    h.help[#h.help+1] = pretty_key(key) .. ') ' .. help
+    h.action[key] = { help=help, action=action, persistent=persistent }
   end
-  
-  if v.help then
-    s = s .. v.help
-  else
-    ui.print('missing help: ' .. raw(v)) 
-  end
-  
-  if v.persistent then
-    s = s .. '*' 
-  end
-  
-  if v.action then
-    if type(v.action) == 'table' then 
-      s = s .. '...' 
-    end
-  else
-    ui.print('missing action: ' .. raw(v))
-  end
-  
-  return s
 end
 
-local function describe_hydra (x)
-  if type(x) ~= 'table' then
-    ui.print('expected a table in describe_hydra: ' .. raw(x))
-    return ''
+function M.create(t)
+  if type(t) ~= 'table' then
+    error('[hydra] "create" expected a table')
   end
   
-  local entries = {}
+  local result = { help={}, action={} }
   
-  if x.help then
-    table.insert(entries, x.help .. ': ')
+  if t.help then
+    result.help[#result.help+1] = t.help
   end
   
-  if x.action then 
-    for k,v in pairs(x.action) do
-      table.insert(entries, describe_hydra_entry(k,v))
-    end
-  else
-    ui.print('missing action: ' .. raw(x)) 
-  end
-  
-  return table.concat(entries, '\n')
-end
-
-local function parse(x)
-  if type(x) ~= 'table' then
-    ui.print('expected a table in describe_hydra: ' .. raw(x))
-    return {}
-  end
-  
-  local result = {}
-  for k, v in pairs(x) do
-    local v2 = { persistent = v.persistent }
+  for k,v in pairs(t) do
+    add_binding(result, v)
+    
     if type(v.action) == 'table' then
-      v2.hint = describe_hydra(v)
-      v2.action = parse(v.action)
-    else
-      v2.action = v.action
-    end
-    if result[v.key] then
-      ui.print('[hydra] WARNING: duplicate binding for key: ' .. pretty_key(v.key) .. ' "' .. v.help .. '"')
-    else
-      result[v.key] = v2
+      tip = table.concat(v.action.help, '\n')
+      if v.help then
+        tip = v.help .. '\n' .. tip
+      end
+      result.action[v.key].tip = tip
     end
   end
+  
   return result
 end
 
@@ -163,16 +171,16 @@ end
 local function start_hydra(key_map)
   current_key_map = key_map.action
   hydra_active = true
-  current_hint = key_map.hint
-  view:call_tip_show(buffer.current_pos, current_hint)
+  current_tip = key_map.tip
+  view:call_tip_show(buffer.current_pos, current_tip)
 end
 
 local function maintain_hydra()
-  view:call_tip_show(buffer.current_pos, current_hint)
+  view:call_tip_show(buffer.current_pos, current_tip)
 end
 
 local function reset_hydra()
-  current_key_map = parsed_keys
+  current_key_map = M.keys
   hydra_active = false
   view:call_tip_cancel()
 end
@@ -214,7 +222,7 @@ end
 
 local function handle_key_seq(key_seq)
   --print('handling', key_seq)
-  local active_key_map = current_key_map[key_seq]
+  local active_key_map = current_key_map.action[key_seq]
 
   if active_key_map == nil then
     -- An unexpected key cancels any active hydra
@@ -235,7 +243,6 @@ end
 --
 
 events.connect(events.INITIALIZED, function()
-  parsed_keys = parse(M.keys)
   reset_hydra()
 end)
 
