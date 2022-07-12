@@ -92,7 +92,7 @@ You can call the following function to change key bindings on-the-fly.
 
 **hydra.bind(hydra, { key=**_key_**, help=**_msg_**, action=**_action_**[, persistent=true] })**
 
-where `hydra` is something you created using `hydra.create`.
+where `hydra` is a value you created using `hydra.create`.
 If you want to change a top-level key binding, pass `hydra.keys` as the first parameter to `hydra.bind`.
 
 # Support
