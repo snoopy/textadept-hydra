@@ -86,6 +86,15 @@ so the Textredux `hijack` function doesn't have the intended effect.
 However, you can use the Textredux API. 
 For example, instead of using `io.open_file()` as a hydra action, use `textredux.fs.open_file`.
 
+# Modifying key bindings on the fly
+
+You can call the following function to change key bindings on-the-fly.
+
+**hydra.bind(hydra, { key=**_key_**, help=**_msg_**, action=**_action_**[, persistent=true] })**
+
+where `hydra` is something you created using `hydra.create`.
+If you want to change a top-level key binding, pass `hydra.keys` as the first parameter to `hydra.bind`.
+
 # Support
 
 Have a question about how to use textadept-hydra? Please [start a discussion](https://github.com/mhwombat/textadept-hydra/discussions).

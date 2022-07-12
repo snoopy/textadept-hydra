@@ -125,23 +125,30 @@ end
 -- Functions to define a hydra
 --
 
-local function set_binding(h, t)
-  local key = assert(t.key, '[hydra] missing "key" field')
-  local action = assert(t.action, '[hydra] missing "action" field')
-  local help = assert(t.help, '[hydra] missing "help" field')
-  local persistent = t.persistent
+function M.bind(h, t)
+  _ = assert(t.key, '[hydra] missing "key" field')
+  _ = assert(t.action, '[hydra] missing "action" field')
+  _ = assert(t.help, '[hydra] missing "help" field')
   
-  h.help[#h.help+1] = pretty_key(key) .. ') ' .. help
-  h.action[key] = { help=help, action=action, persistent=persistent }
+  h.help[#h.help+1] = pretty_key(t.key) .. ') ' .. t.help
+  h.action[t.key] = { help=t.help, action=t.action, persistent=t.persistent }
+
+  if type(t.action) == 'table' then
+    local tip = table.concat(t.action.help, '\n')
+    if t.help then
+      tip = t.help .. '\n' .. tip
+    end
+    h.action[t.key].tip = tip
+  end
 end
 
 local function add_binding(h, t)
-  local key = assert(t.key, '[hydra] missing "key" field')
+  _ = assert(t.key, '[hydra] missing "key" field')
   
-  if h.action[key] then
-    error('[hydra] WARNING: duplicate binding for key: ' .. pretty_key(key) .. ' "' .. help .. '"')
+  if h.action[t.key] then
+    error('[hydra] WARNING: duplicate binding for key: ' .. pretty_key(t.key) .. ' "' .. t.help .. '"')
   else
-    set_binding(h, t)
+    M.bind(h, t)
   end
 end
 
@@ -158,14 +165,6 @@ function M.create(t)
   
   for k,v in pairs(t) do
     add_binding(result, v)
-    
-    if type(v.action) == 'table' then
-      tip = table.concat(v.action.help, '\n')
-      if v.help then
-        tip = v.help .. '\n' .. tip
-      end
-      result.action[v.key].tip = tip
-    end
   end
   
   return result
