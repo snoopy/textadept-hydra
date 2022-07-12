@@ -35,7 +35,8 @@ local function pretty_key(c)
   return c
 end
 
-local function show_table(node)
+-- Adapted from https://stackoverflow.com/a/42062321/663299
+function M.show_table(node)
     local cache, stack, output = {},{},{}
     local depth = 1
     local output_str = "{\n"
@@ -117,24 +118,30 @@ local function show_table(node)
 end
 
 function M.print_keys()
-  ui.print(show_table(M.keys))
+  ui.print(M.show_table(M.keys))
 end
 
 --
 -- Functions to define a hydra
 --
 
-local function add_binding(h, t)
+local function set_binding(h, t)
   local key = assert(t.key, '[hydra] missing "key" field')
   local action = assert(t.action, '[hydra] missing "action" field')
   local help = assert(t.help, '[hydra] missing "help" field')
   local persistent = t.persistent
   
+  h.help[#h.help+1] = pretty_key(key) .. ') ' .. help
+  h.action[key] = { help=help, action=action, persistent=persistent }
+end
+
+local function add_binding(h, t)
+  local key = assert(t.key, '[hydra] missing "key" field')
+  
   if h.action[key] then
     error('[hydra] WARNING: duplicate binding for key: ' .. pretty_key(key) .. ' "' .. help .. '"')
   else
-    h.help[#h.help+1] = pretty_key(key) .. ') ' .. help
-    h.action[key] = { help=help, action=action, persistent=persistent }
+    set_binding(h, t)
   end
 end
 
