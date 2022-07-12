@@ -90,7 +90,7 @@ For example, instead of using `io.open_file()` as a hydra action, use `textredux
 
 You can call the following function to change key bindings on-the-fly.
 
-**hydra.bind(hydra, { key=**_key_**, help=**_msg_**, action=**_action_**[, persistent=true] })**
+**hydra.bind(**_hydra_**, { key=**_key_**, help=**_msg_**, action=**_action_**[, persistent=true] })**
 
 where _hydra_ is a value you created using `hydra.create`.
 If you want to change a top-level key binding, pass `hydra.keys` as the first parameter to `hydra.bind`.
