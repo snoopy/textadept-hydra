@@ -43,7 +43,7 @@ function M.show_table(node)
 
     while true do
         local size = 0
-        for k,v in pairs(node) do
+        for _,_ in pairs(node) do
             size = size + 1
         end
 
@@ -51,7 +51,7 @@ function M.show_table(node)
         for k,v in pairs(node) do
             if (cache[node] == nil) or (cur_index >= cache[node]) then
 
-                if (string.find(output_str,"}",output_str:len())) then
+                if string.find(output_str,"}",output_str:len()) then
                     output_str = output_str .. ",\n"
                 elseif not (string.find(output_str,"\n",output_str:len())) then
                     output_str = output_str .. "\n"
@@ -62,34 +62,34 @@ function M.show_table(node)
                 output_str = ""
 
                 local key
-                if (type(k) == "number" or type(k) == "boolean") then
+                if type(k) == "number" or type(k) == "boolean" then
                     key = "["..tostring(k).."]"
                 else
                     key = "['"..tostring(k).."']"
                 end
 
-                if (type(v) == "number" or type(v) == "boolean") then
+                if type(v) == "number" or type(v) == "boolean" then
                     output_str = output_str .. string.rep('\t',depth) .. key .. " = "..tostring(v)
-                elseif (type(v) == "table") then
+                elseif type(v) == "table" then
                     output_str = output_str .. string.rep('\t',depth) .. key .. " = {\n"
                     table.insert(stack,node)
                     table.insert(stack,v)
                     cache[node] = cur_index+1
                     break
                 else
-                    v_str = tostring(v)
+                    local v_str = tostring(v)
                     v_str = string.gsub(v_str, '\n', '<ret>')
                     output_str = output_str .. string.rep('\t',depth) .. key .. " = '"..v_str.."'"
                 end
 
-                if (cur_index == size) then
+                if cur_index == size then
                     output_str = output_str .. "\n" .. string.rep('\t',depth-1) .. "}"
                 else
                     output_str = output_str .. ","
                 end
             else
                 -- close the table
-                if (cur_index == size) then
+                if cur_index == size then
                     output_str = output_str .. "\n" .. string.rep('\t',depth-1) .. "}"
                 end
             end
@@ -97,11 +97,11 @@ function M.show_table(node)
             cur_index = cur_index + 1
         end
 
-        if (size == 0) then
+        if size == 0 then
             output_str = output_str .. "\n" .. string.rep('\t',depth-1) .. "}"
         end
 
-        if (#stack > 0) then
+        if #stack > 0 then
             node = stack[#stack]
             stack[#stack] = nil
             depth = cache[node] == nil and depth + 1 or depth - 1
@@ -163,7 +163,7 @@ function M.create(t)
     result.help[#result.help+1] = t.help
   end
   
-  for k,v in pairs(t) do
+  for _,v in pairs(t) do
     add_binding(result, v)
   end
   
@@ -208,7 +208,7 @@ local function run(action)
 end
 
 local function run_hydra(key_map)
-  action = key_map.action
+  local action = key_map.action
 
   if type(action) == 'table' then
     start_hydra(key_map)
