@@ -192,8 +192,8 @@ local function start_hydra(key_map)
   view:call_tip_show(buffer.current_pos, current_tip)
 end
 
-local function maintain_hydra()
-  view:call_tip_show(buffer.current_pos, current_tip)
+local function maintain_hydra(help)
+  view:call_tip_show(buffer.current_pos, help)
 end
 
 local function reset_hydra()
@@ -229,7 +229,7 @@ local function run_hydra(key_map)
     run(action)
     -- should the hydra stay active?
     if key_map.persistent then
-      maintain_hydra()
+      maintain_hydra(key_map.help)
     else
       reset_hydra()
     end
