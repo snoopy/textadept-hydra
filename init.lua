@@ -126,10 +126,11 @@ end
 --
 
 function M.bind(h, t)
+  -- print("DEBUG",M.show_table(t))
   _ = assert(t.key, '[hydra] missing "key" field')
   _ = assert(t.action, '[hydra] missing "action" field')
   _ = assert(t.help, '[hydra] missing "help" field')
-  
+
   h.help[#h.help+1] = pretty_key(t.key) .. ') ' .. t.help
   h.action[t.key] = { help=t.help, action=t.action, persistent=t.persistent }
 
@@ -144,7 +145,7 @@ end
 
 local function add_binding(h, t)
   _ = assert(t.key, '[hydra] missing "key" field')
-  
+
   if h.action[t.key] then
     error('[hydra] WARNING: duplicate binding for key: ' .. pretty_key(t.key) .. ' "' .. t.help .. '"')
   else
@@ -156,17 +157,17 @@ function M.create(t)
   if type(t) ~= 'table' then
     error('[hydra] "create" expected a table')
   end
-  
+
   local result = { help={}, action={} }
-  
+
   if t.help then
     result.help[#result.help+1] = t.help
   end
-  
+
   for _,v in pairs(t) do
     add_binding(result, v)
   end
-  
+
   return result
 end
 
@@ -198,10 +199,10 @@ local function run(action)
   current_key_map = nil
   hydra_active = false
   view:call_tip_cancel()
-  
+
   -- run the action
   action()
-  
+
   -- re-enable hydra
   current_key_map = current_key_map_before
   hydra_active = hydra_active_before
