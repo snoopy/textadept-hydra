@@ -257,7 +257,7 @@ end)
 -- Converts keypress event data into a key sequence.
 -- ToDo: If Textadept adds a similar function to the API, use that instead.
 local function interpret_key_seq(code, shift, control, alt, cmd, caps)
-  print(code, keys.KEYSYMS[code], shift, control, alt, cmd, caps)
+  --print(code, keys.KEYSYMS[code], shift, control, alt, cmd, caps)
 
   if caps and (shift or control or alt or cmd) and code < 256 then
     code = string[shift and 'upper' or 'lower'](string.char(code)):byte()
@@ -287,7 +287,7 @@ local function interpret_key_seq(code, shift, control, alt, cmd, caps)
     .. (shift and SHIFT or '')
     .. key
 
-  print(key_seq)
+  --print(key_seq)
   return key_seq
 end
 
