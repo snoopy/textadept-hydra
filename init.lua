@@ -253,46 +253,7 @@ events.connect(events.INITIALIZED, function()
   reset_hydra()
 end)
 
----
--- Converts keypress event data into a key sequence.
--- ToDo: If Textadept adds a similar function to the API, use that instead.
-local function interpret_key_seq(code, shift, control, alt, cmd, caps)
-  --print(code, keys.KEYSYMS[code], shift, control, alt, cmd, caps)
-
-  if caps and (shift or control or alt or cmd) and code < 256 then
-    code = string[shift and 'upper' or 'lower'](string.char(code)):byte()
-  end
-
-  local key = code >= 32 and code < 256 and string.char(code) or keys.KEYSYMS[code]
-  if not key then
-    return
-  end
-
-  -- Qt always give uppercase codes
-  if QT and not shift and code < 256 then key = key:lower() end
-
-  -- Since printable characters are uppercased, disable shift.
-  if shift and code >= 32 and code < 256 then
-    shift = false
-  end
-
-  -- For composed keys on macOS, ignore alt.
-  if (OSX and not CURSES) and alt and code < 256 then
-    alt = false
-  end
-
-  local key_seq = (control and CTRL or '')
-    .. (alt and ALT or '')
-    .. (cmd and OSX and CMD or '')
-    .. (shift and SHIFT or '')
-    .. key
-
-  --print(key_seq)
-  return key_seq
-end
-
-events.connect(events.KEYPRESS, function(code, shift, control, alt, cmd, caps)
-  local key_seq = interpret_key_seq(code, shift, control, alt, cmd, caps)
+events.connect(events.KEYPRESS, function(key_seq)
   return handle_key_seq(key_seq)
 end, 1)
 
