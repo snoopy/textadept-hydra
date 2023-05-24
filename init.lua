@@ -118,6 +118,9 @@ function M.show_table(node)
 end
 
 function M.print_keys()
+  ui.print("---------------")
+  ui.print("Key Definitions")
+  ui.print("---------------")
   ui.print(M.show_table(M.keys))
 end
 
@@ -126,10 +129,17 @@ end
 --
 
 function M.bind(h, t)
-  -- print("DEBUG",M.show_table(t))
-  _ = assert(t.key, '[hydra] missing "key" field')
-  _ = assert(t.action, '[hydra] missing "action" field')
-  _ = assert(t.help, '[hydra] missing "help" field')
+  if t.key == nil then
+    error('[hydra] missing "key" field' .. M.show_table(t))
+  end
+
+  if t.action == nil then
+    error('[hydra] missing "action" field' .. M.show_table(t))
+  end
+
+  if t.help == nil then
+    error('[hydra] missing "help" field' .. M.show_table(t))
+  end
 
   h.help[#h.help+1] = pretty_key(t.key) .. ') ' .. t.help
   h.action[t.key] = { help=t.help, action=t.action, persistent=t.persistent }
@@ -228,7 +238,7 @@ local function run_hydra(key_map)
 end
 
 local function handle_key_seq(key_seq)
-  --print('handling', key_seq)
+  -- print('handling', key_seq)
   local active_key_map = current_key_map.action[key_seq]
 
   if active_key_map == nil then
