@@ -240,6 +240,7 @@ local function run_hydra(key_map)
 end
 
 local function handle_key_seq(key_seq)
+  if buffer._textredux then return end
   -- print('handling', key_seq)
   local active_key_map = current_key_map.action[key_seq]
 
