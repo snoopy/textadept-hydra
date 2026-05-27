@@ -7,6 +7,8 @@ module('lsp')]]
 
 local M = {}
 
+local CURSES = UI == 'terminal'
+
 M.keys = {}
 
 local CTRL, ALT, CMD, SHIFT = 'ctrl+', 'alt+', 'cmd+', 'shift+'
